@@ -3,138 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SK-OS TITAN ERP | SHAHAN KHAN</title>
+    <title>SK-OS TITAN ERP | Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@300;400;600&display=swap');
-        :root { --p: #00f2ff; --s: #ff6600; --bg: #020205; --card: #0d0d15; --text: #e0e0e0; --border: rgba(255,255,255,0.05); }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Poppins', sans-serif; display: grid; grid-template-columns: 240px 1fr; height: 100vh; }
-        .sidebar { background: #050508; padding: 20px; border-right: 1px solid var(--border); }
-        .nav-item { padding: 12px; cursor: pointer; color: #888; border-radius: 8px; margin-bottom: 5px; transition: 0.3s; }
-        .nav-item.active { background: rgba(0, 242, 255, 0.1); color: var(--p); border-left: 3px solid var(--p); }
-        .main { padding: 30px; overflow-y: auto; }
-        .glass { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600&display=swap');
+        :root { --p: #00f2ff; --bg: #020205; --card: #0d0d15; --border: rgba(255,255,255,0.05); }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Poppins', sans-serif; display: grid; grid-template-columns: 240px 1fr; height: 100vh; }
+        
+        .sidebar { background: #050508; border-right: 1px solid var(--border); padding: 25px; }
+        .nav-item { padding: 12px; margin-bottom: 8px; cursor: pointer; color: #666; transition: 0.3s; border-radius: 10px; }
+        .nav-item.active { background: rgba(0, 242, 255, 0.1); color: var(--p); border-left: 4px solid var(--p); }
+        
+        .main { padding: 40px; overflow-y: auto; }
+        .glass { background: var(--card); border-radius: 20px; border: 1px solid var(--border); padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        
+        .btn { background: var(--p); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; }
         th { text-align: left; color: var(--p); padding: 15px; border-bottom: 2px solid var(--border); }
-        td { padding: 15px; border-bottom: 1px solid var(--border); }
-        .btn { background: var(--p); color: #000; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 242, 255, 0.3); }
-        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items:center; justify-content:center; z-index: 1000; }
+        td { padding: 15px; border-bottom: 1px solid var(--border); color: #ccc; }
+        
+        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; }
         .modal-content { background:var(--card); padding:30px; border-radius:24px; width:400px; border:1px solid var(--p); }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; background: #151520; border: 1px solid var(--border); color: white; border-radius: 10px; outline: none; }
-        input:focus { border-color: var(--p); }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; background: #151520; border: 1px solid var(--border); color: #fff; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <nav class="sidebar">
-        <h2 style="font-family:'Orbitron'; color:var(--p); margin-bottom: 30px;">SK-OS</h2>
+    <aside class="sidebar">
+        <h1 style="font-family:'Orbitron'; color:var(--p); font-size:20px; margin-bottom:40px;">SK-OS TITAN</h1>
         <div class="nav-item active"><i class="fas fa-users"></i> Staff Registry</div>
-        <div class="nav-item" onclick="location.href='index.html'"><i class="fas fa-sign-out-alt"></i> Logout</div>
-    </nav>
+        <div class="nav-item" onclick="location.href='index.html'"><i class="fas fa-power-off"></i> Logout</div>
+    </aside>
 
-    <div class="main">
+    <main class="main">
         <div class="glass">
-            <div style="display:flex; justify-content:space-between; align-items: center;">
-                <h3><i class="fas fa-user-shield" style="color:var(--p)"></i> Staff Management</h3>
-                <button class="btn" onclick="openM()">+ Add New Member</button>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Staff Records</h3>
+                <button class="btn" onclick="openM()">+ New Entry</button>
             </div>
             <table>
-                <thead>
-                    <tr>
-                        <th>Name (Login ID)</th>
-                        <th>Role</th>
-                        <th>Passkey</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Name</th><th>Role</th><th>Passkey</th><th>Action</th></tr></thead>
                 <tbody id="staff-body"></tbody>
             </table>
         </div>
-    </div>
+    </main>
 
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h3 style="color:var(--p); margin-bottom: 20px;">Register New Staff</h3>
-            <label style="font-size: 12px; color: #888;">Name (Use this to Login)</label>
-            <input id="f_name" placeholder="e.g. Shahan">
-            
-            <label style="font-size: 12px; color: #888;">Role</label>
+            <h2 style="color:var(--p); margin-bottom:20px;">Add Staff</h2>
+            <input id="f_name" placeholder="Full Name">
             <select id="f_role"><option>Admin</option><option>Staff</option></select>
-            
-            <label style="font-size: 12px; color: #888;">Passkey (Login Password)</label>
-            <input id="f_pass" type="text" placeholder="e.g. 1122">
-            
-            <button class="btn" style="width: 100%; margin-bottom: 10px;" onclick="saveStaff()">Save & Register</button>
-            <button class="btn" style="width: 100%; background:#333; color: white;" onclick="closeM()">Cancel</button>
+            <input id="f_pass" placeholder="Set Passkey">
+            <button class="btn" style="width:100%" onclick="saveStaff()">Register & Save</button>
+            <p onclick="closeM()" style="text-align:center; margin-top:15px; cursor:pointer; font-size:12px; color:#666;">Close</p>
         </div>
     </div>
 
     <script>
-        // DATA LOADING LOGIC (Check if data exists, else empty array)
-        let db = {
-            staff: JSON.parse(localStorage.getItem('erp_staff')) || []
-        };
+        // Fix: Load data and ensure key matches Login page
+        let staffList = JSON.parse(localStorage.getItem('erp_staff_v27')) || [];
 
         function openM() { document.getElementById('modal').style.display = 'flex'; }
         function closeM() { document.getElementById('modal').style.display = 'none'; }
 
         function saveStaff() {
-            const name = document.getElementById('f_name').value.trim();
-            const role = document.getElementById('f_role').value;
-            const pass = document.getElementById('f_pass').value.trim();
-            
-            if(name && pass) {
-                // Add to array
-                db.staff.push({ n: name, r: role, p: pass });
-                
-                // SAVE TO BROWSER PERMANENTLY
-                localStorage.setItem('erp_staff', JSON.stringify(db.staff));
-                
-                renderStaff();
+            const n = document.getElementById('f_name').value.trim();
+            const r = document.getElementById('f_role').value;
+            const p = document.getElementById('f_pass').value.trim();
+
+            if(n && p) {
+                staffList.push({ n, r, p });
+                // Fix: Permanent Storage
+                localStorage.setItem('erp_staff_v27', JSON.stringify(staffList));
+                render();
                 closeM();
-                
-                // Clear inputs
-                document.getElementById('f_name').value = '';
-                document.getElementById('f_pass').value = '';
-                alert("Data saved! You can now login with this name.");
-            } else {
-                alert("Please fill all fields!");
+                alert("Staff Saved! Refresh the page to test.");
             }
         }
 
-        function renderStaff() {
-            const body = document.getElementById('staff-body');
-            if(db.staff.length === 0) {
-                body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#555;">No staff registered yet.</td></tr>';
-                return;
-            }
-
-            body.innerHTML = db.staff.map((s, i) => `
+        function render() {
+            document.getElementById('staff-body').innerHTML = staffList.map((s, i) => `
                 <tr>
-                    <td><b style="color:white">${s.n}</b></td>
-                    <td><span style="background:rgba(0,242,255,0.1); padding:4px 8px; border-radius:5px; font-size:12px;">${s.r}</span></td>
+                    <td><b>${s.n}</b></td>
+                    <td>${s.r}</td>
                     <td><code>${s.p}</code></td>
-                    <td>
-                        <button onclick="delStaff(${i})" style="background:none; border:none; color:#ff4444; cursor:pointer;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
+                    <td><i class="fas fa-trash" onclick="del(${i})" style="color:red; cursor:pointer"></i></td>
                 </tr>
             `).join('');
         }
 
-        function delStaff(i) {
-            if(confirm("Delete this staff member?")) {
-                db.staff.splice(i, 1);
-                localStorage.setItem('erp_staff', JSON.stringify(db.staff));
-                renderStaff();
-            }
+        function del(i) {
+            staffList.splice(i, 1);
+            localStorage.setItem('erp_staff_v27', JSON.stringify(staffList));
+            render();
         }
 
-        // Run when page opens
-        window.onload = renderStaff;
+        render();
     </script>
 </body>
 </html>
-
