@@ -143,6 +143,8 @@
         
         .theme-icon { cursor: pointer; font-size: 18px; color: var(--p); padding: 8px; transition: 0.3s; border-radius: 50%; background: rgba(0,0,0,0.05); }
 
+        #sync-msg { font-size: 10px; color: var(--success); margin-left: 10px; display: none; }
+
         @media print {
             .sidebar, header, .btn, .nav-item, .modal, .theme-icon, .logout-btn, input[type="date"], .sidebar-search { display: none !important; }
             .layout { display: block !important; }
@@ -183,7 +185,10 @@
 
         <div class="main">
             <header>
-                <div><h3 style="margin:0">Admin Overview</h3><small id="real-time" style="color:var(--p)"></small></div>
+                <div>
+                    <h3 style="margin:0">Admin Overview <span id="sync-msg"><i class="fas fa-cloud-upload-alt"></i> Syncing...</span></h3>
+                    <small id="real-time" style="color:var(--p)"></small>
+                </div>
                 <div style="display:flex; align-items:center; gap:15px; background:var(--card); padding:8px 15px; border-radius:50px; border:1px solid var(--border);">
                     <i id="mode-icon" class="fas fa-moon theme-icon" onclick="toggleMode()"></i>
                     <div style="text-align:right"><span style="display:block; font-size:12px; font-weight:600">SHAHAN KHAN</span><span class="badge bg-success">SUPER ADMIN</span></div>
@@ -259,9 +264,10 @@
         </div>
     </div>
 
-    <div id="modal" class="modal"><div class="modal-content"><h3 id="m-title" style="color:var(--p)">Entry</h3><div id="m-fields"></div><div style="display:flex; gap:10px; margin-top:20px"><button class="btn" onclick="save()">SAVE</button><button class="btn btn-del" onclick="closeM()">CANCEL</button></div></div></div>
+    <div id="modal" class="modal"><div class="modal-content"><h3 id="m-title" style="color:var(--p)">Entry</h3><div id="m-fields"></div><div style="display:flex; gap:10px; margin-top:20px"><button class="btn" id="save-btn" onclick="save()">SAVE</button><button class="btn btn-del" onclick="closeM()">CANCEL</button></div></div></div>
 
     <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyM0AsPz97ZqlHe1mAVHT3Gu3zvJwO0cCQ-GgXZhCxijNpDRGHoGAeefb-hVeEhBDiTZw/exec';
         let mode = '', editId = -1;
         let db = {
             staff: JSON.parse(localStorage.getItem('erp_staff')) || [],
@@ -272,6 +278,15 @@
             sched: JSON.parse(localStorage.getItem('erp_sched')) || [],
             att: JSON.parse(localStorage.getItem('erp_att_v27')) || {}
         };
+
+        async function loadCloud() {
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const cloudData = await res.json();
+                db = { ...db, ...cloudData };
+                render();
+            } catch (e) { console.log("Cloud Load Error"); }
+        }
 
         function doSearch() {
             let input = document.getElementById("globalSearch").value.toLowerCase();
@@ -326,7 +341,8 @@
             document.getElementById('modal').style.display = 'flex';
         }
 
-        function save() {
+        async function save() {
+            const btn = document.getElementById('save-btn');
             const v1 = document.getElementById('f1').value, v2 = document.getElementById('f2').value, v3 = document.getElementById('f3').value;
             let entry = {};
             if(mode==='staff') entry={id:v1, n:v2, r:v3, s:document.getElementById('f4').value, p:document.getElementById('f5').value};
@@ -336,30 +352,32 @@
             else if(mode==='comp') entry={d:v1, a:v2, p:v3};
             else if(mode==='sched') entry={day:v1, st:v2, et:document.getElementById('f2b').value, sub:v3, inst:document.getElementById('f4').value};
             
+            // Local Save
             if(editId === -1) db[mode].push(entry); else db[mode][editId] = entry;
             localStorage.setItem('erp_'+mode, JSON.stringify(db[mode]));
+            
+            // Cloud Save
+            document.getElementById('sync-msg').style.display = 'inline';
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ mode: mode, entry: entry })
+                });
+            } catch(e) { console.log("Cloud push failed"); }
+            
+            setTimeout(() => { document.getElementById('sync-msg').style.display = 'none'; }, 2000);
             render(); closeM();
         }
 
         function del(m, idx) { if(confirm("Delete?")) { db[m].splice(idx,1); localStorage.setItem('erp_'+m, JSON.stringify(db[m])); render(); } }
 
         function render() {
-            // Staff Registry
             document.getElementById('staff-body').innerHTML = db.staff.map((x,i) => `<tr><td>${x.id}</td><td>${x.n}</td><td>${x.r}</td><td>${x.s}</td><td><code>${x.p||''}</code></td><td><button class="btn btn-edit" onclick="openM('staff',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('staff',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-            
-            // General Hardware
             document.getElementById('equip-body').innerHTML = db.equip.map((x,i) => `<tr><td>${x.n}</td><td>${x.s}</td><td>${x.st}</td><td><button class="btn btn-edit" onclick="openM('equip',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('equip',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-            
-            // Lab PC Specs - Updated with Edit
             document.getElementById('lab-sys-body').innerHTML = db.lab_sys.map((x,i) => `<tr><td>${x.id}</td><td>${x.gen}</td><td>${x.ram}</td><td>${x.disk}</td><td><button class="btn btn-edit" onclick="openM('lab_sys',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('lab_sys',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-            
-            // Software Inventory - Updated with Edit
             document.getElementById('lab-sw-body').innerHTML = db.lab_sw.map((x,i) => `<tr><td>${x.name}</td><td>${x.ver}</td><td>${x.pc}</td><td><button class="btn btn-edit" onclick="openM('lab_sw',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('lab_sw',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-            
-            // Complaints - Updated with Edit
             document.getElementById('comp-body').innerHTML = db.comp.map((x,i) => `<tr><td>${x.d}</td><td>${x.a}</td><td>${x.p}</td><td><button class="btn btn-edit" onclick="openM('comp',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('comp',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-            
-            // Lab Schedule - Updated with Edit
             document.getElementById('sched-body').innerHTML = db.sched.map((x,i) => `<tr><td>${x.day}</td><td>${x.st}-${x.et}</td><td>${x.sub}</td><td>${x.inst}</td><td><button class="btn btn-edit" onclick="openM('sched',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('sched',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
             
             document.getElementById('d-staff').innerText = db.staff.length;
@@ -419,7 +437,9 @@
         function closeM() { document.getElementById('modal').style.display = 'none'; }
         setInterval(() => { document.getElementById('real-time').innerText = new Date().toLocaleString(); }, 1000);
         document.getElementById('att-date').valueAsDate = new Date();
-        render(); renderPayroll();
+        
+        // Final Load Sequence
+        loadCloud(); 
     </script>
 </body>
 </html>
