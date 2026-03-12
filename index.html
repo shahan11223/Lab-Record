@@ -309,7 +309,7 @@
                 f.innerHTML = `<input id="f1" placeholder="ID" value="${d.id}"><input id="f2" placeholder="Name" value="${d.n}"><select id="f3"><option ${d.r==='Admin'?'selected':''}>Admin</option><option ${d.r==='Staff'?'selected':''}>Staff</option></select><input id="f4" type="number" placeholder="Salary" value="${d.s}"><input id="f5" type="text" placeholder="Password" value="${d.p || ''}">`;
             } else if(m === 'equip') {
                 const d = id === -1 ? {n:'', s:'', st:'Working'} : db.equip[id];
-                f.innerHTML = `<input id="f1" placeholder="Item Name" value="${d.n}"><input id="f2" placeholder="Serial" value="${d.s}"><select id="f3"><option>Working</option><option>Faulty</option></select>`;
+                f.innerHTML = `<input id="f1" placeholder="Item Name" value="${d.n}"><input id="f2" placeholder="Serial" value="${d.s}"><select id="f3"><option ${d.st==='Working'?'selected':''}>Working</option><option ${d.st==='Faulty'?'selected':''}>Faulty</option></select>`;
             } else if(m === 'lab_sys') {
                 const d = id === -1 ? {id:'', gen:'', ram:'', disk:''} : db.lab_sys[id];
                 f.innerHTML = `<input id="f1" placeholder="PC ID" value="${d.id}"><input id="f2" placeholder="Generation" value="${d.gen}"><input id="f3" placeholder="RAM" value="${d.ram}"><input id="f4" placeholder="Storage" value="${d.disk}">`;
@@ -318,10 +318,10 @@
                 f.innerHTML = `<input id="f1" placeholder="Software Name" value="${d.name}"><input id="f2" placeholder="Version" value="${d.ver}"><input id="f3" placeholder="PC" value="${d.pc}">`;
             } else if(m === 'comp') {
                 const d = id === -1 ? {d:'', a:'', p:'Low'} : db.comp[id];
-                f.innerHTML = `<textarea id="f1" placeholder="Issue">${d.d}</textarea><input id="f2" placeholder="Assignee" value="${d.a}"><select id="f3"><option>Low</option><option>High</option><option>Critical</option></select>`;
+                f.innerHTML = `<textarea id="f1" placeholder="Issue">${d.d}</textarea><input id="f2" placeholder="Assignee" value="${d.a}"><select id="f3"><option ${d.p==='Low'?'selected':''}>Low</option><option ${d.p==='High'?'selected':''}>High</option><option ${d.p==='Critical'?'selected':''}>Critical</option></select>`;
             } else if(m === 'sched') {
                 const d = id === -1 ? {day:'Monday', st:'09:00', et:'11:00', sub:'', inst:''} : db.sched[id];
-                f.innerHTML = `<select id="f1"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select><input type="time" id="f2" value="${d.st}"><input type="time" id="f2b" value="${d.et}"><input id="f3" placeholder="Subject" value="${d.sub}"><input id="f4" placeholder="Instructor" value="${d.inst}">`;
+                f.innerHTML = `<select id="f1"><option ${d.day==='Monday'?'selected':''}>Monday</option><option ${d.day==='Tuesday'?'selected':''}>Tuesday</option><option ${d.day==='Wednesday'?'selected':''}>Wednesday</option><option ${d.day==='Thursday'?'selected':''}>Thursday</option><option ${d.day==='Friday'?'selected':''}>Friday</option></select><input type="time" id="f2" value="${d.st}"><input type="time" id="f2b" value="${d.et}"><input id="f3" placeholder="Subject" value="${d.sub}"><input id="f4" placeholder="Instructor" value="${d.inst}">`;
             }
             document.getElementById('modal').style.display = 'flex';
         }
@@ -344,12 +344,23 @@
         function del(m, idx) { if(confirm("Delete?")) { db[m].splice(idx,1); localStorage.setItem('erp_'+m, JSON.stringify(db[m])); render(); } }
 
         function render() {
+            // Staff Registry
             document.getElementById('staff-body').innerHTML = db.staff.map((x,i) => `<tr><td>${x.id}</td><td>${x.n}</td><td>${x.r}</td><td>${x.s}</td><td><code>${x.p||''}</code></td><td><button class="btn btn-edit" onclick="openM('staff',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('staff',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-            document.getElementById('equip-body').innerHTML = db.equip.map((x,i) => `<tr><td>${x.n}</td><td>${x.s}</td><td>${x.st}</td><td><button class="btn btn-edit" onclick="openM('equip',${i})"><i class="fas fa-edit"></i></button></td></tr>`).join('');
-            document.getElementById('lab-sys-body').innerHTML = db.lab_sys.map((x,i) => `<tr><td>${x.id}</td><td>${x.gen}</td><td>${x.ram}</td><td>${x.disk}</td><td><button class="btn btn-del" onclick="del('lab_sys',${i})">X</button></td></tr>`).join('');
-            document.getElementById('lab-sw-body').innerHTML = db.lab_sw.map((x,i) => `<tr><td>${x.name}</td><td>${x.ver}</td><td>${x.pc}</td><td><button class="btn btn-del" onclick="del('lab_sw',${i})">X</button></td></tr>`).join('');
-            document.getElementById('comp-body').innerHTML = db.comp.map((x,i) => `<tr><td>${x.d}</td><td>${x.a}</td><td>${x.p}</td><td><button class="btn btn-del" onclick="del('comp',${i})">X</button></td></tr>`).join('');
-            document.getElementById('sched-body').innerHTML = db.sched.map((x,i) => `<tr><td>${x.day}</td><td>${x.st}-${x.et}</td><td>${x.sub}</td><td>${x.inst}</td><td><button class="btn btn-del" onclick="del('sched',${i})">X</button></td></tr>`).join('');
+            
+            // General Hardware
+            document.getElementById('equip-body').innerHTML = db.equip.map((x,i) => `<tr><td>${x.n}</td><td>${x.s}</td><td>${x.st}</td><td><button class="btn btn-edit" onclick="openM('equip',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('equip',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+            
+            // Lab PC Specs - Updated with Edit
+            document.getElementById('lab-sys-body').innerHTML = db.lab_sys.map((x,i) => `<tr><td>${x.id}</td><td>${x.gen}</td><td>${x.ram}</td><td>${x.disk}</td><td><button class="btn btn-edit" onclick="openM('lab_sys',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('lab_sys',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+            
+            // Software Inventory - Updated with Edit
+            document.getElementById('lab-sw-body').innerHTML = db.lab_sw.map((x,i) => `<tr><td>${x.name}</td><td>${x.ver}</td><td>${x.pc}</td><td><button class="btn btn-edit" onclick="openM('lab_sw',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('lab_sw',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+            
+            // Complaints - Updated with Edit
+            document.getElementById('comp-body').innerHTML = db.comp.map((x,i) => `<tr><td>${x.d}</td><td>${x.a}</td><td>${x.p}</td><td><button class="btn btn-edit" onclick="openM('comp',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('comp',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+            
+            // Lab Schedule - Updated with Edit
+            document.getElementById('sched-body').innerHTML = db.sched.map((x,i) => `<tr><td>${x.day}</td><td>${x.st}-${x.et}</td><td>${x.sub}</td><td>${x.inst}</td><td><button class="btn btn-edit" onclick="openM('sched',${i})"><i class="fas fa-edit"></i></button> <button class="btn btn-del" onclick="del('sched',${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
             
             document.getElementById('d-staff').innerText = db.staff.length;
             document.getElementById('d-inv').innerText = db.equip.length + db.lab_sys.length;
