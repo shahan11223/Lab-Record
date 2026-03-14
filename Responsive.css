@@ -1,0 +1,32 @@
+/* Mobile Devices ke liye */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    /* Agar table hai toh use scrollable banayein */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    /* Container ki width adjust karein */
+    .container {
+        width: 100% !important;
+        margin: 0 auto;
+    }
+
+    /* Font size thoda chhota karein */
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Navigation menu (agar hai) ko vertical karein */
+    nav ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
